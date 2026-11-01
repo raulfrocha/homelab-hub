@@ -1,0 +1,38 @@
+# Dependências
+node_modules/
+
+# Builds
+dist/
+build/
+coverage/
+.nest/
+
+# Variáveis de ambiente e segredos
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+logs/
+
+# Cache de ferramentas
+.cache/
+.turbo/
+
+# Sistema operacional e editores
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+
+# Arquivos locais de teste
+playwright-report/
+test-results/
+
+# Estado local do Yarn Berry
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
