@@ -1,0 +1,102 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma" 
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model applications {
+  id                BigInt              @id @default(autoincrement())
+  name              String              @db.VarChar(120)
+  slug              String              @unique @db.VarChar(80)
+  description       String?
+  url               String
+  access_policy     String              @db.VarChar(20)
+  is_enabled        Boolean             @default(true)
+  created_at        DateTime            @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime            @default(now()) @db.Timestamptz(6)
+  user_applications user_applications[]
+}
+
+model audit_logs {
+  id            BigInt   @id @default(autoincrement())
+  actor_user_id BigInt?
+  action        String   @db.VarChar(100)
+  target_type   String   @db.VarChar(60)
+  target_id     String?
+  created_at    DateTime @default(now()) @db.Timestamptz(6)
+  metadata      Json     @default("{}")
+  users         users?   @relation(fields: [actor_user_id], references: [id], onUpdate: NoAction)
+
+  @@index([actor_user_id])
+  @@index([created_at(sort: Desc)])
+}
+
+model roles {
+  id          BigInt       @id @default(autoincrement())
+  name        String       @unique @db.VarChar(40)
+  description String?
+  user_roles  user_roles[]
+}
+
+model user_applications {
+  user_id                                   BigInt
+  application_id                            BigInt
+  granted_at                                DateTime     @default(now()) @db.Timestamptz(6)
+  granted_by                                BigInt?
+  applications                              applications @relation(fields: [application_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users_user_applications_granted_byTousers users?       @relation("user_applications_granted_byTousers", fields: [granted_by], references: [id], onUpdate: NoAction)
+  users_user_applications_user_idTousers    users        @relation("user_applications_user_idTousers", fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([user_id, application_id])
+  @@index([application_id])
+}
+
+model user_identities {
+  id         BigInt   @id @default(autoincrement())
+  user_id    BigInt
+  issuer     String
+  subject    String
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  users      users    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([issuer, subject], map: "user_identity_unique")
+}
+
+model user_roles {
+  user_id                             BigInt
+  role_id                             BigInt
+  assigned_at                         DateTime @default(now()) @db.Timestamptz(6)
+  assigned_by                         BigInt?
+  users_user_roles_assigned_byTousers users?   @relation("user_roles_assigned_byTousers", fields: [assigned_by], references: [id], onUpdate: NoAction)
+  roles                               roles    @relation(fields: [role_id], references: [id], onUpdate: NoAction)
+  users_user_roles_user_idTousers     users    @relation("user_roles_user_idTousers", fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([user_id, role_id])
+  @@index([role_id])
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
+model users {
+  id                                                    BigInt              @id @default(autoincrement())
+  name                                                  String              @db.VarChar(120)
+  email                                                 String              @db.VarChar(254)
+  nickname                                              String              @unique(map: "users_nickname_unique") @db.VarChar(40)
+  status                                                String              @default("pending") @db.VarChar(20)
+  created_at                                            DateTime            @default(now()) @db.Timestamptz(6)
+  updated_at                                            DateTime            @default(now()) @db.Timestamptz(6)
+  approved_at                                           DateTime?           @db.Timestamptz(6)
+  approved_by                                           BigInt?
+  audit_logs                                            audit_logs[]
+  user_applications_user_applications_granted_byTousers user_applications[] @relation("user_applications_granted_byTousers")
+  user_applications_user_applications_user_idTousers    user_applications[] @relation("user_applications_user_idTousers")
+  user_identities                                       user_identities[]
+  user_roles_user_roles_assigned_byTousers              user_roles[]        @relation("user_roles_assigned_byTousers")
+  user_roles_user_roles_user_idTousers                  user_roles[]        @relation("user_roles_user_idTousers")
+  users                                                 users?              @relation("usersTousers", fields: [approved_by], references: [id], onUpdate: NoAction)
+  other_users                                           users[]             @relation("usersTousers")
+}

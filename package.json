@@ -10,7 +10,11 @@
     "dev:frontend": "yarn workspace @homelab-hub/frontend dev",
     "dev:backend": "yarn workspace @homelab-hub/backend start:dev",
     "build:frontend": "yarn workspace @homelab-hub/frontend build",
-    "build:backend": "yarn workspace @homelab-hub/backend build"
+    "build:backend": "yarn workspace @homelab-hub/backend build",
+    "test:frontend": "yarn workspace @homelab-hub/frontend test",
+    "test:backend": "yarn workspace @homelab-hub/backend test",
+    "lint:frontend": "yarn workspace @homelab-hub/frontend lint",
+    "lint:backend": "yarn workspace @homelab-hub/backend lint"
   },
   "packageManager": "yarn@4.18.1+sha512.b2e1e7524f654f2749d32b4ebcb4622473cb5bcbc485df2007e12a154e50162a4d795526768bc5f5b8f81717bfd79deb2472813d86fb5ae2eb551fa9c872b08f"
 }
